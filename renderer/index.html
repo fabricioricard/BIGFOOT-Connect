@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -6,343 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src 'self' ws: wss: https://bigfoot-connect-site.vercel.app https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
-  <title>BIGFOOT Connect</title>
-  <style>
-    :root {
-      --bg-color: #f3f4f6;
-      --text-color: #1f2937;
-      --card-color: white;
-    }
-
-    body.dark {
-      --bg-color: #1f2937;
-      --text-color: #f3f4f6;
-      --card-color: #374151;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 32px;
-      background-color: #1e3a8a;
-      color: white;
-      position: relative;
-    }
-
-    .header-center {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-    }
-
-    .left-buttons,
-    .right-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .icon-button {
-      background: #3b82f6;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s;
-    }
-
-    .icon-button:hover {
-      background: #2563eb;
-      transform: scale(1.05);
-    }
-
-    main {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .content {
-      text-align: center;
-      max-width: 600px;
-      margin-right: 60px;
-    }
-
-    .faq {
-      position: absolute;
-      top: 40px;
-      right: 0;
-      width: 350px;
-      background-color: var(--card-color);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s ease;
-      text-align: left;
-      max-height: 500px;
-      overflow-y: auto;
-      display: none;
-    }
-
-    #faqToggleContainer {
-      position: absolute;
-      top: 100px;
-      right: 32px;
-      z-index: 10;
-    }
-
-    .big-button {
-      margin: 32px auto;
-      display: block;
-      padding: 20px 40px;
-      background-color: #10b981;
-      color: white;
-      font-size: 24px;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s;
-    }
-
-    .big-button:hover {
-      background-color: #059669;
-      transform: scale(1.05);
-    }
-
-    .big-button:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .status,
-    .quality,
-    .tokens {
-      margin: 16px 0;
-      font-size: 18px;
-    }
-
-    .dashboard-button {
-      display: flex;
-      justify-content: center;
-      margin-top: 40px;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background-color: var(--card-color);
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      width: 320px;
-      max-width: 90%;
-    }
-
-    .modal-content h3 {
-      margin-top: 0;
-    }
-
-    .modal-content input,
-    .modal-content select {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    .modal-content button {
-      margin-top: 12px;
-      width: 100%;
-      padding: 10px;
-    }
-
-    .close {
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    .center-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding-top: 32px;
-    }
-
-    .tokens {
-      margin: 24px 0 16px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .tokens strong {
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    details summary {
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 12px;
-      outline: none;
-    }
-
-    details p {
-      margin: 8px 0 12px 16px;
-      line-height: 1.4;
-    }
-
-    #threadSelector {
-      margin: 16px auto 0;
-      font-size: 18px;
-      max-width: 200px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-    }
-  </style>
-
-  <!-- Firebase compat (funciona no Electron renderer) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="renderer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body>
-  <header>
-    <div class="left-buttons">
-      <button class="icon-button" id="themeBtn" aria-label="Alternar tema claro/escuro">🌓 Tema</button>
-    </div>
-    <div class="header-center">
-      <img src="logo.png" alt="Logo BIGFOOT" class="logo" />
-      BIGFOOT Connect
-    </div>
-    <div class="right-buttons" id="authButtons">
-      <!-- Preenchido dinamicamente -->
-    </div>
-  </header>
-  <div id="faqToggleContainer">
-    <button class="icon-button" id="faqBtn" aria-label="Abrir ou fechar FAQ">❓ F.A.Q</button>
-  </div>
-
-  <main>
-    <div class="center-box">
-      <div class="tokens">
-        <strong id="threadsLabel">Selecione número de threads para mineração</strong>
-        <select id="threadSelector" aria-label="Selecione o nível de compartilhamento">
-          <option value="1" data-en="Low" data-pt="Baixo">🔹 Baixo</option>
-          <option value="2" data-en="Medium" data-pt="Médio">🔸 Médio</option>
-          <option value="3" data-en="High" data-pt="Alto">🔶 Alto</option>
-          <option value="4" data-en="Maximum" data-pt="Máximo" selected>🚀 Máximo</option>
-        </select>
-      </div>
-
-      <button class="big-button" id="connectBtn" aria-label="Conectar ou desconectar"></button>
-
-      <div class="status" aria-live="polite">
-        <strong>Status:</strong> <span id="statusText"></span>
-      </div>
-
-      <div class="quality">
-        <strong>Qualidade da Rede:</strong> <span id="networkQualityValue">--</span>
-      </div>
-
-      <div class="dashboard-button">
-        <button class="icon-button" id="dashboardBtn" aria-label="Abrir dashboard"></button>
-      </div>
-    </div>
-
-    <div id="userWelcome" style="display: none; font-weight: bold; margin-top: 1rem;"></div>
-    <canvas id="usageChart" width="300" height="150" style="margin-top: 1rem;"></canvas>
-
-    <section class="faq" id="faqSection" tabindex="0" aria-label="Seção de FAQ">
-      <!-- FAQ será renderizado aqui -->
-    </section>
-  </main>
-
-  <!-- Modal Configurações -->
-  <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="modal-content">
-      <span class="close" id="closeSettingsModal" aria-label="Fechar modal de configurações">×</span>
-      <h3 id="settingsTitle">Configurações</h3>
-      <label for="languageSelect">Idioma:</label>
-      <select id="languageSelect" name="languageSelect" aria-label="Selecionar idioma">
-        <option value="en">English</option>
-        <option value="pt">Português</option>
-      </select>
-      <button class="icon-button" id="saveSettingsBtn" aria-label="Salvar configurações">Salvar</button>
-    </div>
-  </div>
-
-  <!-- Modal Login -->
-  <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-    <div class="modal-content">
-      <span class="close" id="closeLoginModal" aria-label="Fechar modal de login">×</span>
-      <h3 id="loginTitle">Entrar / Cadastrar</h3>
-      <form id="loginForm" novalidate>
-        <input type="email" id="userEmail" placeholder="Seu e-mail" aria-label="E-mail do usuário" autocomplete="email"
-          required />
-        <input type="password" id="userPassword" placeholder="Senha" aria-label="Senha" autocomplete="current-password"
-          required />
-        <button class="icon-button" id="loginBtn" type="submit" aria-label="Entrar">Entrar</button>
-        <button class="icon-button" id="registerBtn" type="button" aria-label="Cadastrar">Cadastrar</button>
-      </form>
-    </div>
-  </div>
-</body>
-
-=======
-<!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' ws: wss: https://bigfoot-connect-site.vercel.app https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' ws: wss: https://bigfootconnect.tech/ https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
   <title>BIGFOOT Connect</title>
 
   <link rel="stylesheet" href="styles.css" />
@@ -355,6 +18,9 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
+  <!-- Sistema de animação -->
+  <script type="module" src="animatedDots.js"></script>
+
   <!-- Your renderer script as ES module -->
   <script type="module" src="renderer.js"></script>
 </head>
@@ -365,12 +31,12 @@
       <button class="icon-button" id="themeBtn" aria-label="Alternar tema claro/escuro">🌓 Tema</button>
     </div>
     <div class="header-center">
-  <img src="logo.png" alt="Logo BIGFOOT" class="logo" />
-  <span class="brand-name">
-    <span class="brand-left">BIGFOOT</span>
-    <span class="brand-right">Connect</span>
-  </span>
-</div>
+      <img src="logo.png" alt="Logo BIGFOOT" class="logo" />
+      <span class="brand-name">
+        <span class="brand-left">BIGFOOT</span>
+        <span class="brand-right">Connect</span>
+      </span>
+    </div>
     <div class="right-buttons" id="authButtons">
       <!-- Botões de autenticação e F.A.Q serão preenchidos dinamicamente -->
     </div>
@@ -387,6 +53,7 @@
   <main>
     <div class="main-content">
       <div class="center-panel">
+        <!-- Seletor de nível de compartilhamento -->
         <div class="tokens">
           <strong id="threadsLabel">Nível de Compartilhamento</strong>
           <select id="threadSelector" aria-label="Selecione o nível de compartilhamento">
@@ -396,18 +63,31 @@
             <option value="4" data-en="Maximum" data-pt="Máximo" selected>🚀 Máximo</option>
           </select>
         </div>
-        <button class="big-button" id="connectBtn">Conectar</button>
-        <div class="status">
-          <strong>Status:</strong> <span id="statusText">Desconectado</span>
+
+        <!-- Botão principal de conectar/desconectar -->
+        <button class="big-button" id="connectBtn">🔌 Conectar</button>
+
+        <!-- Status sem elementos visuais desnecessários -->
+        <div class="status-container" id="statusContainer">
+          <span id="statusText">Desconectado</span>
         </div>
+
+        <!-- Qualidade da rede -->
         <div class="quality">
-          <strong>Qualidade da Rede:</strong> <span id="networkQualityValue">--</span>
+          <strong id="networkQualityLabel">Qualidade da Rede:</strong>
+          <span id="networkQualityValue">--</span>
         </div>
+
+        <!-- Botão do dashboard -->
         <div class="dashboard-button">
-          <button class="icon-button" id="dashboardBtn">Dashboard</button>
+          <button class="icon-button" id="dashboardBtn">🖥️ Dashboard</button>
         </div>
       </div>
+
+      <!-- Controle do gráfico -->
       <button id="toggleGraphBtn" class="icon-button" aria-label="Ocultar ou mostrar gráfico">Ocultar Gráfico</button>
+      
+      <!-- Gráfico de uso -->
       <div class="usage-graph">
         <h2 id="usageGraphTitle">Histórico de Compartilhamento</h2>
         <canvas id="usageChart"></canvas>
@@ -415,19 +95,22 @@
     </div>
   </main>
 
+  <!-- Modal de Configurações -->
   <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="modal-content">
       <span class="close" id="closeSettingsModal" aria-label="Fechar modal de configurações">×</span>
       <h3 id="settingsTitle">Configurações</h3>
-      <label for="languageSelect">Idioma:</label>
-      <select id="languageSelect" name="languageSelect" aria-label="Selecionar idioma">
-        <option value="en">English</option>
-        <option value="pt" selected>Português</option>
-      </select>
-      <button class="icon-button" id="saveSettingsBtn" aria-label="Salvar configurações">Salvar</button>
+      <div id="settingsForm">
+        <label for="languageSelect" id="languageLabel">Idioma:</label>
+        <select id="languageSelect" name="languageSelect" aria-label="Selecionar idioma" required>
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+        </select>
+      </div>
     </div>
   </div>
 
+  <!-- Modal de Login -->
   <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <div class="modal-content">
       <span class="close" id="closeLoginModal" aria-label="Fechar modal de login">×</span>
@@ -435,12 +118,16 @@
       <form id="loginForm" novalidate>
         <input type="email" id="userEmail" placeholder="Seu e-mail" aria-label="E-mail do usuário" autocomplete="email" required />
         <input type="password" id="userPassword" placeholder="Senha" aria-label="Senha" autocomplete="current-password" required />
-        <button class="icon-button" id="loginBtn" type="submit" aria-label="Entrar">Entrar</button>
-        <button class="icon-button" id="registerBtn" type="button" aria-label="Cadastrar">Cadastrar</button>
+        <button class="primary-button" id="loginBtn" type="submit" aria-label="Entrar">Entrar</button>
+
+        <div class="divider" id="orText">ou</div>
+
+        <button class="secondary-button" id="registerBtn" type="button" aria-label="Cadastrar">Cadastrar</button>
       </form>
     </div>
   </div>
 
+  <!-- Ícones sociais -->
   <div id="socialIcons">
     <a href="https://x.com/BIGFOOT_Connect" target="_blank" aria-label="X">
       <img src="icons/x.png" alt="X" />
@@ -456,6 +143,4 @@
     </a>
   </div>
 </body>
-
->>>>>>> bc8b339 (Refatoração completa do renderer: modularização, novos ícones, FAQ dinâmico e melhorias visuais)
 </html>

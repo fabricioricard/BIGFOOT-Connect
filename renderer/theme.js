@@ -1,19 +1,34 @@
 export function initializeTheme() {
   const savedTheme = localStorage.getItem('bigfootTheme');
   console.log('Tema salvo:', savedTheme);
+
   if (savedTheme === 'dark') {
     document.body.classList.add('dark');
-    updateTheme();
+    document.body.classList.remove('light');
+  } else {
+    document.body.classList.add('light');
+    document.body.classList.remove('dark');
   }
+
+  updateTheme();
 }
 
 export function toggleTheme(usageChart) {
   console.log('Alternando tema...');
-  document.body.classList.toggle('dark');
   const isDark = document.body.classList.contains('dark');
-  console.log('Tema atual:', isDark ? 'dark' : 'light');
-  localStorage.setItem('bigfootTheme', isDark ? 'dark' : 'light');
+
+  if (isDark) {
+    document.body.classList.remove('dark');
+    document.body.classList.add('light');
+    localStorage.setItem('bigfootTheme', 'light');
+  } else {
+    document.body.classList.remove('light');
+    document.body.classList.add('dark');
+    localStorage.setItem('bigfootTheme', 'dark');
+  }
+
   updateTheme();
+
   if (usageChart && document.querySelector('.usage-graph').classList.contains('show')) {
     setTimeout(() => {
       usageChart.resize();

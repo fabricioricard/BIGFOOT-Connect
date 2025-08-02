@@ -2,9 +2,10 @@
   --bg-color: #1e293b;
   --text-color: #f1f5f9;
   --card-color: #2d3748;
-  --primary-color: #8b5cf6;
-  --accent-color: #34d399;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --primary-color: #0f172a;
+  --accent-color: #166534;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.2);
   --border-radius: 8px;
   --transition: all 0.3s ease-in-out;
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -25,7 +26,7 @@ header {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #6b21a8, #8b5cf6);
+  background: linear-gradient(135deg, #0f172a, #1e293b);
   color: #ffffff;
   gap: 16px;
   box-shadow: var(--shadow);
@@ -51,7 +52,7 @@ header {
   font-weight: 700;
   text-align: center;
   position: relative;
-  left: 10px; /* antes era 30px ou 40px */
+  left: 10px;
 }
 
 .brand-name {
@@ -71,7 +72,7 @@ header {
 }
 
 .header-center img:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .right-buttons {
@@ -96,8 +97,8 @@ header {
 
 .icon-button:hover {
   background: #7c3aed;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
 }
 
 .icon-button:focus {
@@ -106,11 +107,11 @@ header {
 }
 
 #themeBtn {
-  background: #a855f7;
+  background: #166534;
 }
 
 #themeBtn:hover {
-  background: #9333ea;
+  background: #22c55e;
 }
 
 #faqBtn {
@@ -218,7 +219,7 @@ main {
   gap: 24px;
   width: 100%;
   max-width: 600px;
-  margin-left: -90px; /* Mantido para o conteúdo do meio */
+  margin-left: -120px;
   margin-top: -30px;
 }
 
@@ -244,34 +245,93 @@ main {
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
 }
 
+#threadSelector:hover {
+  background-color: #374151;
+  border-color: #6b7280;
+}
+
+/* ✅ BOTÃO CONECTAR AINDA MAIOR E MAIS DESTACADO */
 .big-button {
-  padding: 14px 32px;
+  padding: 18px 42px;
   background: var(--accent-color);
   color: #ffffff;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: 12px;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: var(--shadow);
+  box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
   margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 200px;
 }
 
 .big-button:hover {
   background: #22c55e;
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
 }
 
 .big-button:disabled {
   background: #6b7280;
   cursor: not-allowed;
   box-shadow: none;
+  transform: none;
 }
 
 .big-button:focus {
-  outline: 2px solid #6ee7b7;
-  outline-offset: 2px;
+  outline: 3px solid #6ee7b7;
+  outline-offset: 3px;
+}
+
+/* 🔴 Botão desconectar com destaque visual ainda maior */
+.big-button.disconnect {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+  color: white !important;
+  box-shadow: 0 6px 25px rgba(220, 53, 69, 0.5) !important;
+  animation: disconnect-pulse 2s ease-in-out infinite;
+  min-width: 200px;
+}
+
+.big-button.disconnect:hover {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 30px rgba(220, 53, 69, 0.7) !important;
+}
+
+@keyframes disconnect-pulse {
+  0%, 100% { 
+    box-shadow: 0 6px 25px rgba(220, 53, 69, 0.5);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 8px 35px rgba(220, 53, 69, 0.8);
+    transform: scale(1.02);
+  }
+}
+
+/* 🎯 Efeito de onda no clique */
+.big-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+}
+
+.big-button:active::after {
+  width: 300px;
+  height: 300px;
 }
 
 .status,
@@ -281,12 +341,25 @@ main {
   font-size: 1rem;
   font-weight: 500;
   text-align: center;
+  transition: var(--transition);
+}
+
+.status:hover,
+.quality:hover,
+.tokens:hover {
+  color: #e2e8f0;
 }
 
 .dashboard-button {
   display: flex;
   justify-content: center;
   margin-top: 40px;
+}
+
+.dashboard-button .icon-button:hover {
+  background: #22c55e;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
 }
 
 .modal {
@@ -321,14 +394,15 @@ main {
 .modal-content input,
 .modal-content select {
   width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #4b5563;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  padding: 14px 16px;
+  margin: 12px 0;
+  border: 2px solid #4b5563;
+  border-radius: 10px;
+  font-size: 1rem;
   background: var(--card-color);
   color: var(--text-color);
   transition: var(--transition);
+  box-sizing: border-box;
 }
 
 .modal-content input:focus,
@@ -338,7 +412,14 @@ main {
   outline: none;
 }
 
-.modal-content button {
+.modal-content input:hover,
+.modal-content select:hover {
+  border-color: #6b7280;
+  background-color: #374151;
+}
+
+/* ✅ REMOVIDO: Estilos do botão Save */
+/* .modal-content button {
   width: 100%;
   padding: 12px;
   background: var(--accent-color);
@@ -353,7 +434,7 @@ main {
 .modal-content button:hover {
   background: #22c55e;
   transform: translateY(-1px);
-}
+} */
 
 .close {
   position: absolute;
@@ -422,9 +503,9 @@ details p {
   display: none;
   opacity: 0;
   transition: var(--transition);
-  float: right; /* Força o alinhamento à direita */
-  max-width: 80%; /* Limita a largura para evitar overflow */
-  margin-right: -40px; /* Desloca mais à direita */
+  float: right;
+  max-width: 80%;
+  margin-right: -40px;
 }
 
 .usage-graph.show {
@@ -436,11 +517,8 @@ details p {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 12px;
-}
-
-.usage-graph h2 {
-  padding-left: 20px; /* distância do título para a esquerda */
-  text-align: left;   /* garante que o texto fique alinhado à esquerda */
+  padding-left: 20px;
+  text-align: left;
 }
 
 .usage-graph canvas {
@@ -463,7 +541,7 @@ details p {
 
 #toggleGraphBtn:hover {
   background: #22c55e;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 #toggleGraphBtn:focus {
@@ -488,7 +566,7 @@ details p {
 }
 
 #socialIcons img:hover {
-  transform: scale(1.2);
+  transform: scale(1.15);
 }
 
 @media (max-width: 768px) {
@@ -539,8 +617,15 @@ details p {
   }
 
   .usage-graph {
-    margin-right: -20px; /* Ajuste menor para telas menores */
+    margin-right: -20px;
     max-width: 85%;
+  }
+
+  /* ✅ Ajustes responsivos para botão maior */
+  .big-button {
+    padding: 16px 36px;
+    font-size: 1.1rem;
+    min-width: 180px;
   }
 }
 
@@ -552,8 +637,9 @@ details p {
 
   .big-button,
   .dashboard-button {
-    padding: 12px 24px;
+    padding: 14px 28px;
     font-size: 1rem;
+    min-width: 160px;
   }
 
   .modal-content {
@@ -597,7 +683,199 @@ details p {
   }
 
   .usage-graph {
-    margin-right: -10px; /* Ajuste ainda menor para telas muito pequenas */
+    margin-right: -10px;
     max-width: 90%;
   }
 }
+
+.primary-button {
+  background-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  padding: 12px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  margin-top: 12px;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.primary-button:hover {
+  background-color: #22c55e;
+  transform: translateY(-1px);
+}
+
+.secondary-button {
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 600;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  margin-top: 12px;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.secondary-button:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.divider {
+  margin: 14px 0 6px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+body.light .faq {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155;
+}
+
+body.light #faqBtn {
+  background: #166534 !important;
+  color: #fff !important;
+}
+
+body.light #faqBtn:hover {
+  background: #22c55e !important;
+}
+
+.faq details summary {
+  color: #facc15;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: var(--transition);
+}
+
+.faq details summary:hover {
+  color: #fde047;
+}
+
+/* 🎯 Estilos específicos para animação de status */
+.status.sharing {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+  border: 2px solid #28a745;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  position: relative;
+}
+
+.status.stopped {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #6c757d;
+  border: 2px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ✨ Efeito de pulso para status ativo */
+.status.sharing::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #28a745, #20c997, #28a745);
+  border-radius: 10px;
+  z-index: -1;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* 🎯 Animação suave para mudança de texto */
+.animated-status {
+  animation: text-glow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes text-glow {
+  from { text-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+  to { text-shadow: 0 0 15px rgba(40, 167, 69, 0.8), 0 0 25px rgba(40, 167, 69, 0.4); }
+}
+
+/* 🎯 Indicador de status com ponto */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.status-dot.active {
+  background: #28a745;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+/* 🎯 Melhorias no valor da qualidade da rede */
+#networkQualityValue {
+  font-weight: bold;
+  color: #28a745;
+  transition: color 0.3s ease;
+}
+
+/* 🎯 Cores dinâmicas para qualidade da rede */
+#networkQualityValue.poor { color: #dc3545; }
+#networkQualityValue.fair { color: #ffc107; }
+#networkQualityValue.good { color: #28a745; }
+
+/* 🎯 Responsividade adicional para animações */
+@media (max-width: 768px) {
+  .animated-status {
+    animation-duration: 1s;
+  }
+  
+  .status.sharing::before {
+    animation-duration: 1.5s;
+  }
+}
+
+/* 🎯 Modo escuro para os novos elementos */
+body.dark .status.stopped {
+  background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+  color: #adb5bd;
+  border-color: #6c757d;
+}
+
+/* 🎯 Suporte para tema claro nos novos estilos */
+body.light .status.sharing {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+  border-color: #28a745;
+}
+
+body.light .status.sharing::before {
+  background: linear-gradient(45deg, #28a745, #20c997, #28a745);
+}
+
+body.light #networkQualityValue {
+  color: #166534;
+}
+
+body.light #networkQualityValue.poor { color: #dc3545; }
+body.light #networkQualityValue.fair { color: #d97706; }
+body.light #networkQualityValue.good { color: #166534; }
