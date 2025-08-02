@@ -1,7 +1,16 @@
+# Node modules
 node_modules/
+
+# Builds
+out/
 dist/
-*.log
-.DS_Store
+build/
 *.exe
+*.asar
+*.nupkg
+*.dmg
+*.zip
+
+# Ambiente
 .env
-output/
+*.log
