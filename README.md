@@ -81,7 +81,7 @@ Distribuído sob a Licença MIT. Veja `LICENSE` para mais informações.
 
 ## 📬 Contato
 
-- ✉️ Email: contato@bigfootconnect.app
-- 🌍 Site oficial: em breve
+- ✉️ Email: ...
+- 🌍 Site oficial: https://bigfootconnect.tech/
 
 > Feito com 🦶 por quem acredita na descentralização da conexão.
