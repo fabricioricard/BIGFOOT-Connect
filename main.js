@@ -16,12 +16,160 @@ let mainWindow;
 let tray = null;
 let minerProcess = null;
 let miningThreads = 4;
-let totalSharedToday = 0;
-let miningInterval = null;
 let currentUserEmail = null;
-let isSharing = false; // ✅ Estado global do compartilhamento
+let isSharing = false;
 
-// Função para obter o caminho correto do packetcrypt.exe
+// Variáveis para tracking individual do usuário baseado em shares
+const WALLET_ADDRESS = 'pkt1q2phzyfzd7aufszned7q2h77t4u0kl3exxgyuqf';
+
+let lastAcceptedShares = 0;
+let totalBigPointsToday = 0;
+let currentFirebaseToken = null;
+
+// Implementa o controle de instância única
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+      mainWindow.show();
+    }
+  });
+
+  app.whenReady().then(() => {
+    createTray();
+    createWindow();
+    autoUpdater.checkForUpdatesAndNotify();
+  });
+}
+
+// Função para obter token Firebase do renderer
+function getFirebaseIdToken() {
+  return new Promise((resolve, reject) => {
+    if (currentFirebaseToken) {
+      resolve(currentFirebaseToken);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      reject(new Error('Timeout ao obter token Firebase'));
+    }, 5000);
+    
+    mainWindow?.webContents.send('request-firebase-token');
+    
+    const handleTokenResponse = (_, token) => {
+      clearTimeout(timeout);
+      ipcMain.removeListener('firebase-token-response', handleTokenResponse);
+      
+      if (token && token !== 'NO_USER') {
+        currentFirebaseToken = token;
+        resolve(token);
+      } else {
+        reject(new Error('Usuário não autenticado'));
+      }
+    };
+    
+    ipcMain.once('firebase-token-response', handleTokenResponse);
+  });
+}
+
+// Função para sincronizar dados usando API backend
+async function syncBigPointsData() {
+  if (!currentUserEmail) {
+    console.log('[SYNC] Email não disponível, pulando sincronização');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const amount = parseFloat(totalBigPointsToday.toFixed(6));
+
+  console.log(`[SYNC] Enviando ${amount} BIG Points via API backend...`);
+
+  try {
+    const idToken = await getFirebaseIdToken();
+    
+    const response = await axios.post('https://api.bigfootconnect.tech/api/bigpoints', {
+      email: currentUserEmail,
+      date: today,
+      amount: amount,
+      idToken: idToken
+    }, {
+      timeout: 15000,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data && response.data.success) {
+      console.log('[SYNC] BIG Points sincronizados com sucesso via API!');
+      console.log('[SYNC] Resposta:', response.data.message);
+      if (response.data.data) {
+        console.log('[SYNC] Dados:', JSON.stringify(response.data.data));
+      }
+    } else {
+      console.error('[SYNC] Erro na resposta da API:', response.data);
+    }
+
+  } catch (error) {
+    console.error('[SYNC] Erro ao sincronizar via API:', error.message);
+    
+    if (error.response) {
+      console.error('[SYNC] Status HTTP:', error.response.status);
+      console.error('[SYNC] Dados erro:', error.response.data);
+      
+      if (error.response.status === 401) {
+        console.log('[SYNC] Token Firebase expirado, limpando cache...');
+        currentFirebaseToken = null;
+      }
+    }
+  }
+}
+
+// Função para parsear shares aceitas do usuário individual
+function parseUserMiningShares(output) {
+  const statsRegex = /accept\/reject\/overload:\s*\[(\d+)\/(\d+)\/(\d+)\]/;
+  const match = output.match(statsRegex);
+  
+  if (match) {
+    const acceptedShares = parseInt(match[1], 10);
+    const rejectedShares = parseInt(match[2], 10);
+    const overloadShares = parseInt(match[3], 10);
+    
+    console.log(`[USER SHARES] Aceitas: ${acceptedShares}, Rejeitadas: ${rejectedShares}, Overload: ${overloadShares}`);
+    
+    if (acceptedShares > lastAcceptedShares) {
+      const newShares = acceptedShares - lastAcceptedShares;
+      lastAcceptedShares = acceptedShares;
+      
+      // Valor conservador por share para evitar prejuízo
+      const pktPerShare = 0.001; // 1 share aceita = 0.001 PKT (valor seguro)
+      const bigPointsEarned = newShares * pktPerShare;
+      
+      totalBigPointsToday += bigPointsEarned;
+      
+      console.log(`[USER MINING] +${newShares} shares aceitas`);
+      console.log(`[USER MINING] +${bigPointsEarned.toFixed(6)} BIG Points ganhos`);
+      console.log(`[USER MINING] Total do usuário hoje: ${totalBigPointsToday.toFixed(6)} BIG Points`);
+      
+      // Envia dados atualizados para o renderer
+      mainWindow?.webContents.send('bigpoints-data', totalBigPointsToday);
+      
+      // Sincroniza com backend apenas quando há novos ganhos
+      syncBigPointsData();
+      
+      return { newShares, bigPointsEarned, totalBigPoints: totalBigPointsToday };
+    }
+  }
+  
+  return null;
+}
+
 function getPacketcryptPath() {
   if (isDev) {
     return path.join(__dirname, 'assets', 'packetcrypt.exe');
@@ -30,25 +178,17 @@ function getPacketcryptPath() {
   }
 }
 
-// Função para obter o caminho correto do ícone
 function getIconPath() {
   let iconPath;
   
   if (isDev) {
-    // Em desenvolvimento
     iconPath = path.join(__dirname, 'assets', 'icon.ico');
   } else {
-    // Em produção - com electron-builder, o ícone pode estar em vários locais
     const possiblePaths = [
-      // Caminho padrão do electron-builder
       path.join(process.resourcesPath, 'app', 'assets', 'icon.ico'),
-      // Caminho alternativo
       path.join(process.resourcesPath, 'assets', 'icon.ico'),
-      // Dentro do ASAR
       path.join(__dirname, 'assets', 'icon.ico'),
-      // BuildResources do electron-builder
       path.join(process.resourcesPath, 'icon.ico'),
-      // Caminho para electron-forge
       path.join(process.resourcesPath, 'app.asar.unpacked', 'assets', 'icon.ico')
     ];
     
@@ -61,7 +201,6 @@ function getIconPath() {
     
     if (!iconPath) {
       console.error('Nenhum ícone encontrado nos caminhos:', possiblePaths);
-      // Fallback: usa o ícone da aplicação
       iconPath = process.execPath;
     }
   }
@@ -70,7 +209,6 @@ function getIconPath() {
   return iconPath;
 }
 
-// Função para criar o Tray
 function createTray() {
   if (tray) {
     console.log('Tray já existe, não criando novamente');
@@ -88,13 +226,11 @@ function createTray() {
     
     tray = new Tray(iconPath);
     
-    // ✅ Verifica se o tray foi criado com sucesso
     if (!tray) {
       console.error('Falha ao criar o tray');
       return false;
     }
     
-    // ✅ Define o tooltip ANTES do menu (importante no Windows)
     tray.setToolTip('BIGFOOT Connect - Click to open');
     
     const contextMenu = Menu.buildFromTemplate([
@@ -129,7 +265,6 @@ function createTray() {
     
     tray.setContextMenu(contextMenu);
     
-    // ✅ Eventos do tray
     tray.on('click', () => {
       console.log('Tray clicado');
       if (mainWindow) {
@@ -156,7 +291,6 @@ function createTray() {
       }
     });
     
-    // ✅ Testa se o tray está realmente ativo
     console.log('Tray criado com sucesso!');
     console.log('Tray destruído?', tray.isDestroyed());
     console.log('Plataforma:', process.platform);
@@ -170,6 +304,7 @@ function createTray() {
   }
 }
 
+// IPC Handlers
 ipcMain.handle('register-user', async (_, id, password) => {
   try {
     await axios.post('https://bigfootconnect.tech/register', { id, password });
@@ -183,6 +318,12 @@ ipcMain.handle('register-user', async (_, id, password) => {
 ipcMain.handle('store-email', async (_, email) => {
   currentUserEmail = email;
   console.log(`E-mail armazenado: ${email}`);
+});
+
+ipcMain.handle('store-firebase-token', async (_, token) => {
+  currentFirebaseToken = token;
+  console.log('[TOKEN] Token Firebase atualizado');
+  return { success: true };
 });
 
 ipcMain.handle('open-external', async (_, url) => {
@@ -206,7 +347,7 @@ function createWindow() {
     height: 600,
     icon: path.join(__dirname, 'assets', 'icon.ico'),
     autoHideMenuBar: true,
-    show: false, // ✅ Não mostra inicialmente
+    show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -217,13 +358,11 @@ function createWindow() {
   mainWindow.setMenu(null);
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
-  // ✅ Mostra a janela quando estiver pronta
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     mainWindow.focus();
   });
 
-  // Bloqueia DevTools no modo produção
   if (app.isPackaged) {
     mainWindow.webContents.on('devtools-opened', () => {
       mainWindow.webContents.closeDevTools();
@@ -239,13 +378,11 @@ function createWindow() {
     });
   }
 
-  // ✅ Evento de fechamento corrigido
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
       mainWindow.hide();
       
-      // ✅ Mostra notificação apenas na primeira vez
       if (process.platform === 'win32' && tray) {
         tray.displayBalloon({
           title: 'BIGFOOT Connect',
@@ -257,15 +394,14 @@ function createWindow() {
       stopMining();
     }
   });
-
-  // ✅ Remove a chamada do createTray() daqui
 }
 
+// Função de mineração baseada em shares do usuário
 function startMining(threads = 4) {
   if (minerProcess) return;
 
-  startSimulatedSharing();
   miningThreads = threads;
+  isSharing = true;
 
   const packetcryptPath = getPacketcryptPath();
   
@@ -276,8 +412,12 @@ function startMining(threads = 4) {
     return;
   }
 
-  console.log(`Iniciando mineração com: ${packetcryptPath}`);
-  const args = ['ann', '-t', threads.toString(), '-p', 'pkt1q2phzyfzd7aufszned7q2h77t4u0kl3exxgyuqf', 'http://pool.pkt.world'];
+  console.log(`Iniciando mineração individual do usuário: ${packetcryptPath}`);
+  const args = ['ann', '-t', threads.toString(), '-p', WALLET_ADDRESS, 'http://pool.pkt.world'];
+
+  // Reset contadores individuais do usuário
+  lastAcceptedShares = 0;
+  // NÃO reseta totalBigPointsToday para manter acúmulo do dia
 
   try {
     minerProcess = spawn(packetcryptPath, args);
@@ -285,12 +425,14 @@ function startMining(threads = 4) {
     minerProcess.stdout.on('data', (data) => {
       const output = data.toString();
       console.log(`[STDOUT] ${output}`);
+      parseUserMiningShares(output);
       mainWindow?.webContents.send('miner-log', output);
     });
 
     minerProcess.stderr.on('data', (data) => {
       const error = data.toString();
       console.error(`[STDERR] ${error}`);
+      parseUserMiningShares(error);
       mainWindow?.webContents.send('miner-log', error);
     });
 
@@ -298,15 +440,18 @@ function startMining(threads = 4) {
       console.error(`Erro ao executar minerador: ${error.message}`);
       mainWindow?.webContents.send('miner-log', `ERRO: ${error.message}`);
       minerProcess = null;
+      isSharing = false;
     });
 
     minerProcess.on('close', (code) => {
       console.log(`Minerador finalizado com código ${code}`);
       minerProcess = null;
+      isSharing = false;
       mainWindow?.webContents.send('sharing-status', false);
     });
 
     mainWindow?.webContents.send('sharing-status', true);
+    
   } catch (error) {
     console.error(`Erro ao iniciar mineração: ${error.message}`);
     mainWindow?.webContents.send('miner-log', `ERRO: ${error.message}`);
@@ -314,44 +459,15 @@ function startMining(threads = 4) {
 }
 
 function stopMining() {
-  console.log('Parando compartilhamento...');
+  console.log('Parando mineração...');
   if (minerProcess) {
     minerProcess.kill();
     minerProcess = null;
     mainWindow?.webContents.send('sharing-status', false);
   }
-  isSharing = false; // ✅ Define estado como parado
-  stopSimulatedSharing();
-  mainWindow?.webContents.send('shared-data', totalSharedToday);
-}
-
-function startSimulatedSharing() {
-  if (miningInterval) return;
-  miningInterval = setInterval(() => {
-    const sharedMB = Math.random() * 2;
-    totalSharedToday += sharedMB;
-    console.log(`+${sharedMB.toFixed(2)}MB compartilhados hoje`);
-  }, 60000);
-}
-
-function stopSimulatedSharing() {
-  clearInterval(miningInterval);
-  miningInterval = null;
-}
-
-function syncSharedData() {
-  if (!currentUserEmail) return;
-
-  const today = new Date().toISOString().split('T')[0];
-  const amount = parseFloat(totalSharedToday.toFixed(2));
-
-  axios.post('https://bigfootconnect.tech/usage', {
-    email: currentUserEmail,
-    date: today,
-    amount,
-  })
-    .then(() => console.log('Dados de uso enviados com sucesso!'))
-    .catch(err => console.error('Erro ao enviar dados de uso:', err.message));
+  
+  isSharing = false;
+  mainWindow?.webContents.send('bigpoints-data', totalBigPointsToday);
 }
 
 ipcMain.handle('toggle-sharing', async (_, enabled) => {
@@ -360,47 +476,43 @@ ipcMain.handle('toggle-sharing', async (_, enabled) => {
   return { success: true };
 });
 
-// ✅ Novo handler para verificar estado do compartilhamento
 ipcMain.handle('get-sharing-status', async () => {
   return { 
     isSharing, 
     threads: miningThreads,
-    totalShared: totalSharedToday 
+    totalBigPoints: totalBigPointsToday
   };
 });
 
-// ✅ Handler para quando mudar idioma - preserva estado
 ipcMain.on('language-changed', () => {
   console.log('Idioma alterado, preservando estado do compartilhamento:', isSharing);
-  // Reenvia o status atual para atualizar a interface
   mainWindow?.webContents.send('sharing-status', isSharing);
-  mainWindow?.webContents.send('shared-data', totalSharedToday);
+  mainWindow?.webContents.send('bigpoints-data', totalBigPointsToday);
 });
 
 ipcMain.on('start-mining-with-threads', (_, threads) => {
   startMining(threads);
 });
 
-// ✅ Evento before-quit corrigido
+ipcMain.on('firebase-token-response', (event, token) => {
+  // Este listener é tratado dinamicamente em getFirebaseIdToken()
+});
+
 app.on('before-quit', (event) => {
-  // Se não está sendo encerrado intencionalmente, cancela
   if (!app.isQuitting) {
     event.preventDefault();
     return;
   }
   
-  // Sincroniza dados antes de fechar
-  mainWindow?.webContents.send('shared-data', totalSharedToday);
-  syncSharedData();
+  mainWindow?.webContents.send('bigpoints-data', totalBigPointsToday);
+  syncBigPointsData();
   
-  // Destrói o tray
   if (tray) {
     tray.destroy();
     tray = null;
   }
 });
 
-// Atualizações automáticas
 autoUpdater.autoDownload = true;
 
 autoUpdater.on('update-available', () => {
@@ -425,20 +537,16 @@ autoUpdater.on('update-downloaded', () => {
   });
 });
 
-app.whenReady().then(() => {
-  // ✅ Cria o tray PRIMEIRO, antes da janela
-  createTray();
-  createWindow();
-  autoUpdater.checkForUpdatesAndNotify();
-});
-
 app.on('window-all-closed', () => {
-  // ✅ No Windows/Linux, mantém o app rodando mesmo sem janelas
   if (process.platform !== 'darwin') {
-    // Não encerra o app, apenas mantém rodando em background
     return;
   }
   app.quit();
+});
+
+ipcMain.handle('debug-email', async () => {
+  console.log('[DEBUG] Email atual no main:', currentUserEmail);
+  return { email: currentUserEmail };
 });
 
 app.on('activate', () => {

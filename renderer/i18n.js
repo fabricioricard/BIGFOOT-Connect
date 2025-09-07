@@ -40,8 +40,9 @@ export const translations = {
     // Saudação do usuário
     greeting: "Olá, ",
     
-    // Gráfico de uso
+    // Gráfico de uso - ✅ ATUALIZADO para BIG Points
     usageGraphTitle: "Histórico de Compartilhamento",
+    bigPointsGraphTitle: "Histórico de BIG Points",
     toggleGraph: "Ocultar Gráfico",
     showGraph: "Mostrar Gráfico",
     
@@ -101,8 +102,9 @@ export const translations = {
     // User greeting
     greeting: "Hello, ",
     
-    // Usage graph
+    // Usage graph - ✅ UPDATED for BIG Points
     usageGraphTitle: "Sharing History",
+    bigPointsGraphTitle: "BIG Points History",
     toggleGraph: "Hide Graph",
     showGraph: "Show Graph",
     
@@ -163,8 +165,9 @@ export const translations = {
     // Saludo del usuario
     greeting: "Hola, ",
     
-    // Gráfico de uso
+    // Gráfico de uso - ✅ ACTUALIZADO para BIG Points
     usageGraphTitle: "Historial de Compartir",
+    bigPointsGraphTitle: "Historial de BIG Points",
     toggleGraph: "Ocultar Gráfico",
     showGraph: "Mostrar Gráfico",
     

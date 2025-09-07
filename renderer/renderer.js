@@ -1,6 +1,6 @@
 import { translations, currentLang, setLanguage, updateThreadOptionsLanguage } from './i18n.js';
-import { initializeFirebase, setupAuth, handleLogin, handleLogout, handleRegister } from './auth.js';
-import { initializeChart, updateChartData, registrarUsoDiario } from './chart.js';
+import { initializeFirebase, setupAuth, handleLogin, handleLogout, handleRegister, setupAutomaticTokenRenewal } from './auth.js';
+import { initializeChart, updateChartData, registrarBigPointsGanhos } from './chart.js';
 import { initializeTheme, toggleTheme } from './theme.js';
 import { renderFAQ } from './faq.js';
 
@@ -10,7 +10,6 @@ if (window.env?.isProd) {
   });
 }
 
-// ✅ Classe para animação dos pontos - MELHORADA
 class AnimatedDots {
   constructor() {
     this.dotsInterval = null;
@@ -36,7 +35,6 @@ class AnimatedDots {
       const dots = '.'.repeat(this.currentDots);
       element.textContent = `${baseText}${dots}`;
       
-      // ✅ Adiciona classe para animação CSS
       element.classList.add('animated-status');
     }, speed);
   }
@@ -48,7 +46,6 @@ class AnimatedDots {
       this.currentDots = 0;
       this.isActive = false;
       
-      // Remove classe de animação
       const element = document.getElementById('statusText');
       if (element) {
         element.classList.remove('animated-status');
@@ -61,23 +58,19 @@ class AnimatedDots {
   }
 }
 
-// ✅ Instância global para animação
 const animatedDots = new AnimatedDots();
-window.animatedDots = animatedDots; // Disponibiliza globalmente
+window.animatedDots = animatedDots;
 
-// ✅ ESTADO GLOBAL PERSISTENTE
+// Estado global persistente
 let isCurrentlySharing = false;
-let connectionInterval = null;
-let currentNetworkQuality = 0;
-
-// ✅ NOVO: Flag para controlar se a aplicação está sendo fechada
+let totalBigPointsToday = 0;
 let isAppClosing = false;
+let firebaseIdToken = null; // Token Firebase para API backend
 
 document.addEventListener('DOMContentLoaded', () => {
   const authButtons = document.getElementById('authButtons');
   const connectBtn = document.getElementById('connectBtn');
   const statusText = document.getElementById('statusText');
-  const networkQualityValue = document.getElementById('networkQualityValue');
   const dashboardBtn = document.getElementById('dashboardBtn');
   const faqSection = document.getElementById('faqSection');
   const languageSelect = document.getElementById('languageSelect');
@@ -96,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.isLoggedIn = false;
   window.isMining = false;
   window.pktMined = 0;
-  let networkQuality = 0;
 
   const { auth, db } = initializeFirebase();
   const usageChart = initializeChart(currentLang, translations);
@@ -104,21 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupAuth(auth, updateText, () => updateChartData(usageChart, db, currentLang, translations), toggleModal);
 
-  // ✅ NOVO: Listener para detectar quando app está sendo fechado
+  // Setup para gerenciar token Firebase
+  setupFirebaseTokenManagement();
+  
+  // Setup para renovar token periodicamente
+  setupAutomaticTokenRenewal();
+
   if (window.electronAPI) {
-    // Escuta evento de fechamento do app
     window.electronAPI.onAppClosing?.(() => {
-      console.log('🚪 App sendo fechado, definindo flag...');
+      console.log('[RENDERER] App sendo fechado, definindo flag...');
       isAppClosing = true;
       
-      // Para todas as animações e intervals IMEDIATAMENTE
       try {
         if (animatedDots) {
           animatedDots.stop();
-        }
-        if (connectionInterval) {
-          clearInterval(connectionInterval);
-          connectionInterval = null;
         }
       } catch (error) {
         // Silencia erros durante fechamento
@@ -126,9 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.electronAPI.onSharingStatus?.((status) => {
-      if (isAppClosing) return; // ✅ Evita updates durante fechamento
+      if (isAppClosing) return;
       
-      console.log('🔄 Status de compartilhamento alterado:', status);
+      console.log('[RENDERER] Status de compartilhamento alterado:', status);
       isCurrentlySharing = status;
       window.isMining = status;
       updateSharingUI(status);
@@ -136,21 +127,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.electronAPI.onMinerLog?.((log) => {
       if (isAppClosing) return;
-      console.log('📊 Log do minerador:', log);
+      console.log('[RENDERER] Log do minerador:', log);
     });
 
     window.electronAPI.onMinerError?.((error) => {
       if (isAppClosing) return;
-      console.error('❌ Erro do minerador:', error);
+      console.error('[RENDERER] Erro do minerador:', error);
       alert(currentLang === 'pt' ? `Erro: ${error}` : `Error: ${error}`);
     });
 
-    window.electronAPI.onSharedData?.((data) => {
+    // Listener para dados reais de BIG Points
+    window.electronAPI.onBigPointsData?.((data) => {
       if (isAppClosing) return;
-      console.log('📈 Dados compartilhados atualizados:', data);
+      console.log('[RENDERER] BIG Points atualizados (dados reais):', data);
+      totalBigPointsToday = data;
+      
+      // Atualiza gráfico quando há dados novos
+      if (data > 0 && window.isLoggedIn) {
+        // Não registra mais diretamente - apenas atualiza gráfico
+        updateChartData(usageChart, db, currentLang, translations);
+      }
     });
 
-    // ✅ Verifica estado inicial do compartilhamento
+    // Verifica estado inicial do compartilhamento
     setTimeout(async () => {
       try {
         if (isAppClosing) return;
@@ -158,155 +157,108 @@ document.addEventListener('DOMContentLoaded', () => {
         if (status.isSharing) {
           isCurrentlySharing = true;
           window.isMining = true;
+          totalBigPointsToday = status.totalBigPoints || 0;
           updateSharingUI(true);
         }
       } catch (err) {
-        console.error('⚠️ Erro ao verificar status inicial:', err);
+        console.error('[RENDERER] Erro ao verificar status inicial:', err);
       }
     }, 500);
   }
 
-  // ✅ Função MELHORADA para atualizar UI do compartilhamento
+  // Configurar gerenciamento de token Firebase
+  function setupFirebaseTokenManagement() {
+    if (window.electronAPI) {
+      // Escuta solicitações de token do main process
+      window.electronAPI.onRequestFirebaseToken?.(() => {
+        console.log('[RENDERER] Main process solicitou token Firebase');
+        sendFirebaseTokenToMain();
+      });
+    }
+  }
+
+  // Obter e enviar token para main process
+  async function sendFirebaseTokenToMain() {
+    try {
+      const user = auth.currentUser;
+      
+      if (!user) {
+        console.log('[RENDERER] Usuário não logado, enviando NO_USER');
+        window.electronAPI.send('firebase-token-response', 'NO_USER');
+        return;
+      }
+
+      // Obtém token ID atualizado
+      const token = await user.getIdToken(true); // force refresh = true
+      firebaseIdToken = token;
+      
+      console.log('[RENDERER] Token Firebase obtido e enviado');
+      
+      // Envia token para main process
+      window.electronAPI.send('firebase-token-response', token);
+      
+      // Também armazena no main process para uso futuro
+      window.electronAPI.storeFirebaseToken?.(token);
+      
+    } catch (error) {
+      console.error('[RENDERER] Erro ao obter token Firebase:', error);
+      window.electronAPI.send('firebase-token-response', 'ERROR');
+    }
+  }
+
   function updateSharingUI(isSharing) {
-    if (isAppClosing) return; // ✅ Evita updates durante fechamento
+    if (isAppClosing) return;
     
     const t = translations[currentLang];
     const statusDot = document.getElementById('statusDot');
     
     if (isSharing) {
-      // ✅ Estado COMPARTILHANDO com visual verde destacado
       connectBtn.textContent = t.stop;
       connectBtn.className = 'big-button disconnect';
       
-      // ✅ Atualiza status com classe CSS para cor verde
       statusText.className = 'status sharing';
       
-      // ✅ Ativa indicador visual
       if (statusDot) {
         statusDot.className = 'status-dot active';
       }
       
-      // ✅ Inicia animação dos pontos com texto traduzido
-      const sharingText = t.statusMining || 'Sharing';
+      const sharingText = t.statusMining || 'Mining';
       animatedDots.start('statusText', sharingText, 600);
       
-      // ✅ Simula progresso da qualidade da rede
-      startNetworkQualitySimulation();
-      
     } else {
-      // ✅ Estado PARADO
       connectBtn.textContent = t.connect;
       connectBtn.className = 'big-button';
       
-      // ✅ Para animação e mostra status parado
       animatedDots.stop();
       statusText.textContent = t.statusDisconnected;
       statusText.className = 'status stopped';
       
-      // ✅ Desativa indicador visual
       if (statusDot) {
         statusDot.className = 'status-dot';
       }
-      
-      // ✅ Reset qualidade da rede
-      stopNetworkQualitySimulation();
     }
     
     connectBtn.disabled = !window.isLoggedIn;
   }
 
-  // ✅ NOVA função para simular qualidade da rede
-  function startNetworkQualitySimulation() {
-    if (isAppClosing) return; // ✅ Evita criar intervals durante fechamento
-    
-    if (connectionInterval) {
-      clearInterval(connectionInterval);
-    }
-    
-    currentNetworkQuality = 0;
-    const maxQuality = 85 + Math.random() * 15; // 85-100%
-    
-    connectionInterval = setInterval(() => {
-      if (!isCurrentlySharing || isAppClosing) {
-        clearInterval(connectionInterval);
-        return;
-      }
-      
-      // Incremento progressivo com variação
-      const increment = Math.random() * 8 + 2; // 2-10% por vez
-      currentNetworkQuality = Math.min(currentNetworkQuality + increment, maxQuality);
-      
-      if (networkQualityValue) {
-        networkQualityValue.textContent = `${Math.round(currentNetworkQuality)}%`;
-        
-        // ✅ Atualiza cores baseado na qualidade
-        networkQualityValue.className = 'network-quality-value';
-        if (currentNetworkQuality > 70) {
-          networkQualityValue.classList.add('good');
-        } else if (currentNetworkQuality > 40) {
-          networkQualityValue.classList.add('fair');
-        } else {
-          networkQualityValue.classList.add('poor');
-        }
-      }
-      
-      // Para quando atinge qualidade máxima
-      if (currentNetworkQuality >= maxQuality) {
-        clearInterval(connectionInterval);
-        
-        // Pequenas flutuações na qualidade
-        connectionInterval = setInterval(() => {
-          if (!isCurrentlySharing || isAppClosing) {
-            clearInterval(connectionInterval);
-            return;
-          }
-          
-          const variation = (Math.random() - 0.5) * 6; // ±3%
-          currentNetworkQuality = Math.max(75, Math.min(100, currentNetworkQuality + variation));
-          if (networkQualityValue) {
-            networkQualityValue.textContent = `${Math.round(currentNetworkQuality)}%`;
-          }
-        }, 2000);
-      }
-    }, 400);
-  }
-
-  function stopNetworkQualitySimulation() {
-    if (connectionInterval) {
-      clearInterval(connectionInterval);
-      connectionInterval = null;
-    }
-    
-    currentNetworkQuality = 0;
-    if (networkQualityValue) {
-      networkQualityValue.textContent = '--';
-      networkQualityValue.className = 'network-quality-value';
-    }
-  }
-
-  // ✅ Função CORRIGIDA para atualizar textos mantendo estado
   function updateText() {
-    if (isAppClosing) return; // ✅ Evita updates durante fechamento
+    if (isAppClosing) return;
     
     const t = translations[currentLang];
 
-    // ✅ CORREÇÃO: Preserva estado de compartilhamento ao trocar idioma
     const wasSharing = isCurrentlySharing;
 
-    // ✅ Atualiza UI do compartilhamento baseado no estado atual
     if (wasSharing) {
       connectBtn.textContent = t.stop;
       connectBtn.className = 'big-button disconnect';
       
-      // ✅ Atualiza animação com novo idioma
       if (animatedDots.isActive) {
-        animatedDots.start('statusText', t.statusMining || 'Sharing', 600);
+        animatedDots.start('statusText', t.statusMining || 'Mining', 600);
       } else {
         statusText.textContent = t.statusMining;
       }
       statusText.className = 'status sharing';
       
-      // Mantém indicador ativo
       const statusDot = document.getElementById('statusDot');
       if (statusDot) {
         statusDot.className = 'status-dot active';
@@ -320,10 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     connectBtn.disabled = !window.isLoggedIn;
     
-    // ✅ Atualiza demais elementos da interface
     document.getElementById('threadsLabel').textContent = t.selectThreadsLabel;
-    document.querySelector('.quality strong').textContent = t.networkQuality;
-    networkQualityValue.textContent = wasSharing ? `${Math.round(currentNetworkQuality)}%` : '--';
     dashboardBtn.textContent = t.dashboard;
     themeBtn.textContent = t.theme;
     document.getElementById('settingsTitle').textContent = t.settingsTitle;
@@ -335,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     registerBtn.textContent = t.registerBtn;
     document.getElementById('orText').textContent = t.orText;
 
-    if (usageGraphTitle) usageGraphTitle.textContent = t.usageGraphTitle;
+    if (usageGraphTitle) usageGraphTitle.textContent = t.bigPointsGraphTitle || t.usageGraphTitle;
 
     if (window.isLoggedIn && userGreeting) {
       const user = auth.currentUser;
@@ -365,21 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFAQ(currentLang, faqSection);
   }
 
-  function simulateNetworkQuality() {
-    if (!isCurrentlySharing || isAppClosing) {
-      networkQuality = Math.floor(50 + Math.random() * 50);
-      updateText();
-    }
-  }
-
-  function simulateMining() {
-    if (!window.isMining || isAppClosing) return;
-    window.pktMined++;
-    registrarUsoDiario(db, 1);
-    updateChartData(usageChart, db, currentLang, translations);
-    updateText();
-  }
-
   function toggleModal(id) {
     if (isAppClosing) return;
     const modal = document.getElementById(id);
@@ -395,14 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
   closeSettingsModal?.addEventListener('click', () => toggleModal('settingsModal'));
   closeLoginModal?.addEventListener('click', () => toggleModal('loginModal'));
   
-  // ✅ Event listener direto no select de idioma para mudança imediata
   languageSelect?.addEventListener('change', () => {
     if (isAppClosing) return;
     
     const wasSharing = isCurrentlySharing;
     const oldLang = currentLang;
     
-    console.log(`🌐 Mudança imediata de idioma: ${oldLang} → ${languageSelect.value} (compartilhando: ${wasSharing})`);
+    console.log(`[RENDERER] Mudança imediata de idioma: ${oldLang} → ${languageSelect.value} (compartilhando: ${wasSharing})`);
     
     setLanguage(languageSelect.value);
     
@@ -410,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
       window.electronAPI.send('language-changed');
     }
     
-    // ✅ Preserva estado imediatamente
     setTimeout(() => {
       if (isAppClosing) return;
       if (wasSharing) {
@@ -468,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(url);
       }
     } catch (err) {
-      console.error('❌ Erro ao abrir link externo:', err);
+      console.error('[RENDERER] Erro ao abrir link externo:', err);
       window.open(url);
     }
   });
@@ -478,7 +410,6 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('bigfootThreads', threadSelector.value);
   });
 
-  // ✅ Função MELHORADA para conectar/desconectar
   function handleConnect() {
     if (isAppClosing) return;
     
@@ -487,10 +418,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    const newState = !isCurrentlySharing; // ✅ Usa estado persistente
+    const newState = !isCurrentlySharing;
     const threads = parseInt(threadSelector.value, 10) || 4;
 
-    console.log(`🔄 Alternando estado: ${isCurrentlySharing} → ${newState}`);
+    console.log(`[RENDERER] Alternando estado: ${isCurrentlySharing} → ${newState}`);
 
     if (window.electronAPI?.startMiningWithThreads) {
       if (newState) {
@@ -499,13 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.electronAPI.toggleSharing(false);
       }
     } else {
-      // ✅ Fallback para teste sem Electron
+      // Fallback para teste sem Electron
       isCurrentlySharing = newState;
       window.isMining = newState;
       updateSharingUI(newState);
     }
-
-    // A UI será atualizada pelo listener onSharingStatus ou pelo fallback
   }
 
   function openDashboard() {
@@ -523,65 +452,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ✅ CORREÇÃO PRINCIPAL: Cleanup seguro para evitar erros no Tray
   function safeCleanup() {
     try {
-      console.log('🧹 Iniciando cleanup seguro...');
+      console.log('[RENDERER] Iniciando cleanup seguro...');
       isAppClosing = true;
       
-      // Para animações
       if (animatedDots) {
         animatedDots.stop();
       }
       
-      // Para intervals
-      if (connectionInterval) {
-        clearInterval(connectionInterval);
-        connectionInterval = null;
-      }
-      
-      // Limpa variáveis globais
       isCurrentlySharing = false;
-      currentNetworkQuality = 0;
+      totalBigPointsToday = 0;
+      firebaseIdToken = null;
       
-      console.log('✅ Cleanup seguro concluído');
+      console.log('[RENDERER] Cleanup seguro concluído');
     } catch (error) {
-      console.warn('⚠️ Erro durante cleanup (silenciado):', error);
-      // Não propaga o erro
+      console.warn('[RENDERER] Erro durante cleanup (silenciado):', error);
     }
   }
 
-  // ✅ Eventos de fechamento com cleanup seguro
   window.addEventListener('beforeunload', safeCleanup);
   window.addEventListener('unload', safeCleanup);
   
-  // ✅ Tratamento específico para Electron
   if (typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
     window.addEventListener('beforeunload', safeCleanup);
     
-    // ✅ NOVO: Listener específico para quando Electron está fechando
     if (window.electronAPI?.onBeforeQuit) {
       window.electronAPI.onBeforeQuit(safeCleanup);
     }
   }
 
-  setInterval(simulateNetworkQuality, 5000);
-  setInterval(simulateMining, 10000);
-
   updateText();
 
-  console.log('🚀 BIGFOOT Connect - Sistema inicializado com correções de fechamento!');
+  console.log('[RENDERER] BIGFOOT Connect - Sistema inicializado com API backend integrada!');
 });
 
-// ✅ Funções utilitárias exportadas
 export function getConnectionStatus() {
   return {
     isSharing: isCurrentlySharing,
     hasAnimation: animatedDots?.isActive() || false,
     language: currentLang,
-    networkQuality: currentNetworkQuality
+    totalBigPoints: totalBigPointsToday
   };
 }
+
+window.electronAPI.debugEmail?.().then(console.log);
 
 export function forceStopConnection() {
   if (isCurrentlySharing) {

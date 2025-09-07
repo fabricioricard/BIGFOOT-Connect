@@ -8,26 +8,31 @@ contextBridge.exposeInMainWorld('env', {
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // ✅ APIs existentes
+  // APIs existentes
   startMiningWithThreads: (threads) => ipcRenderer.send('start-mining-with-threads', threads), 
   toggleSharing: (state) => ipcRenderer.invoke('toggle-sharing', state),
   registerUser: (email, password) => ipcRenderer.invoke('register-user', email, password), 
   openDashboard: () => ipcRenderer.invoke('open-dashboard'), 
   storeEmail: (email) => ipcRenderer.invoke('store-email', email),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
-  
-  // ✅ Novas APIs para gerenciar estado do compartilhamento
   getSharing: () => ipcRenderer.invoke('get-sharing-status'),
   
-  // ✅ Listener para mudanças de idioma
+  // APIs para backend - gerenciamento de tokens Firebase
+  storeFirebaseToken: (token) => ipcRenderer.invoke('store-firebase-token', token),
+  
+  // Listener para mudanças de idioma e comunicação IPC
   send: (channel, data) => {
-    const validChannels = ['language-changed', 'start-mining-with-threads'];
+    const validChannels = [
+      'language-changed', 
+      'start-mining-with-threads', 
+      'firebase-token-response'
+    ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     }
   },
 
-  // ✅ Listeners para eventos do main process
+  // Listeners para eventos do main process
   onSharingStatus: (callback) => {
     ipcRenderer.on('sharing-status', (event, status) => {
       callback(status);
@@ -46,13 +51,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
     });
   },
 
-  onSharedData: (callback) => {
-    ipcRenderer.on('shared-data', (event, data) => {
+  // Listener para dados reais de BIG Points
+  onBigPointsData: (callback) => {
+    ipcRenderer.on('bigpoints-data', (event, data) => {
       callback(data);
     });
   },
 
-  // ✅ Remove listeners quando não precisar mais
+  // Listener para solicitações de token Firebase do main process
+  onRequestFirebaseToken: (callback) => {
+    ipcRenderer.on('request-firebase-token', (event) => {
+      callback();
+    });
+  },
+
+  // Cleanup de listeners
   removeAllListeners: (channel) => {
     ipcRenderer.removeAllListeners(channel);
   }
