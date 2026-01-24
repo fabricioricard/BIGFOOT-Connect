@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+
+# Builds
+out/
+dist/
+build/
+*.exe
+*.asar
+*.nupkg
+*.dmg
+*.zip
+
+# Ambiente
+.env
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db

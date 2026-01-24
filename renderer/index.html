@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' ws: wss: https://bigfootconnect.tech/ https://api.bigfootconnect.tech/ https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://*.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.gstatic.com;">
+  <title>BIGFOOT Connect</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css" />
+  
+  <!-- CSS adicional para garantir visibilidade -->
+  <style>
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #666;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+    
+    .status-dot.active {
+      background: #00FF87;
+      box-shadow: 0 0 10px rgba(0, 255, 135, 0.6);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+  </style>
+
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+</head>
+
+<body>
+  <div class="app-container">
+
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <span class="brand-name">
+          <span class="brand-left">BIGFOOT</span>
+          <span class="brand-right">Connect</span>
+        </span>
+      </div>
+
+      <a href="#" class="sidebar-item active" id="nav-home" data-page="home">
+        <span class="sidebar-icon">🏠</span>
+        <span data-i18n="navHome">Home</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-wallet" data-page="wallet">
+        <span class="sidebar-icon">💼</span>
+        <span data-i18n="navWallet">Wallet</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-chat" data-page="chat">
+        <span class="sidebar-icon">💬</span>
+        <span data-i18n="navChat">Chat</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-profile" data-page="profile">
+        <span class="sidebar-icon">👤</span>
+        <span data-i18n="navProfile">Profile</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-settings" data-page="settings">
+        <span class="sidebar-icon">⚙️</span>
+        <span data-i18n="navSettings">Settings</span>
+      </a>
+
+      <div class="sidebar-profile" id="authButtons"></div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content-wrapper">
+
+      <!-- HOME -->
+      <section id="page-home" class="page-content active">
+        <h1 class="page-title" data-i18n="home">Home</h1>
+        <div class="main-content-grid">
+          <div class="card">
+            <div class="card-header" data-i18n="connectionControl">Connection Control</div>
+            
+            <!-- Container para o slider moderno -->
+            <div id="threadSelectorContainer"></div>
+            
+            <button class="big-button" id="connectBtn">🔌 Connect</button>
+            <div class="status-container" id="statusContainer">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText" data-i18n="statusDisconnected">Disconnected</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header" id="usageGraphTitle" data-i18n="bigHistory">BIG History</div>
+            <canvas id="usageChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- WALLET -->
+      <section id="page-wallet" class="page-content">
+        <!-- Será preenchido pelo wallet.js -->
+      </section>
+
+      <!-- CHAT -->
+      <section id="page-chat" class="page-content">
+        <!-- Será preenchido pelo chat.js -->
+      </section>
+
+      <!-- PROFILE (NOVA PÁGINA) -->
+      <section id="page-profile" class="page-content">
+        <!-- Será preenchido pelo profile.js -->
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="page-settings" class="page-content">
+        <h1 class="page-title" data-i18n="settings">Settings</h1>
+        
+        <div class="card">
+          <div class="card-header" data-i18n="generalSettings">General Settings</div>
+          <div id="settingsForm">
+            <div class="form-group">
+              <label for="languageSelect" id="languageLabel" class="form-label" data-i18n="language">Language:</label>
+              <select id="languageSelect" name="languageSelect" aria-label="Select language" required>
+                <option value="en">English</option>
+                <option value="pt">Português</option>
+              </select>
+            </div>
+            <div class="toggle-switch-container">
+              <span class="toggle-switch-label" id="themeLabel" data-i18n="darkMode">Dark Mode</span>
+              <label class="switch">
+                <input type="checkbox" id="themeToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ===== ÍCONES SOCIAIS ===== -->
+  <div id="socialIcons">
+    <a href="https://x.com/BIGFOOT_Connect" target="_blank" aria-label="X">
+      <img src="icons/x.png" alt="X" />
+    </a>
+    <a href="https://www.youtube.com/@BIGFOOTConnect" target="_blank" aria-label="YouTube">
+      <img src="icons/youtube.png" alt="YouTube" />
+    </a>
+    <a href="https://discord.gg/mkfmncN5Sa" target="_blank" aria-label="Discord">
+      <img src="icons/discord.png" alt="Discord" />
+    </a>
+    <a href="https://t.me/+qrkA9s2VTxVhMzcx" target="_blank" aria-label="Telegram">
+      <img src="icons/telegram.png" alt="Telegram" />
+    </a>
+  </div>
+
+  <!-- ===== NAVEGAÇÃO DE EMERGÊNCIA ===== -->
+  <script>
+    (function() {
+        console.log('🚨 [EMERGENCY NAV] Iniciando sistema de navegação...');
+        
+        function initEmergencyNav() {
+            console.log('🚨 [EMERGENCY NAV] DOM pronto, configurando navegação...');
+            
+            const navItems = document.querySelectorAll('.sidebar-item');
+            const pages = document.querySelectorAll('.page-content');
+            
+            console.log('🚨 [EMERGENCY NAV] Nav Items encontrados:', navItems.length);
+            console.log('🚨 [EMERGENCY NAV] Páginas encontradas:', pages.length);
+            
+            if (navItems.length === 0 || pages.length === 0) {
+                console.error('🚨 [EMERGENCY NAV] ❌ ERRO: Elementos não encontrados!');
+                return;
+            }
+            
+            // Remove listeners antigos e adiciona novos
+            navItems.forEach((item, index) => {
+                const pageId = item.getAttribute('data-page');
+                console.log(`🚨 [EMERGENCY NAV] Configurando item ${index + 1}: "${pageId}"`);
+                
+                // Remove listener antigo clonando o elemento (preserva data-i18n)
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+                
+                // Adiciona novo listener
+                newItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('🚨 [EMERGENCY NAV] ========================================');
+                    console.log('🚨 [EMERGENCY NAV] 🖱️ CLIQUE DETECTADO!');
+                    console.log('🚨 [EMERGENCY NAV] 📄 Destino:', pageId);
+                    console.log('🚨 [EMERGENCY NAV] ========================================');
+                    
+                    // Remove active de todos os nav items
+                    document.querySelectorAll('.sidebar-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    
+                    // Oculta todas as páginas
+                    document.querySelectorAll('.page-content').forEach(page => {
+                        page.classList.remove('active');
+                        page.style.display = 'none';
+                    });
+                    
+                    // Ativa o item clicado
+                    newItem.classList.add('active');
+                    console.log('🚨 [EMERGENCY NAV] ✅ Nav item ativado');
+                    
+                    // Mostra a página correspondente
+                    const targetPage = document.getElementById(`page-${pageId}`);
+                    
+                    if (targetPage) {
+                        targetPage.classList.add('active');
+                        targetPage.style.display = 'block';
+                        console.log('🚨 [EMERGENCY NAV] ✅ Página ativada:', targetPage.id);
+                        
+                        // Inicializa funcionalidades da página
+                        setTimeout(() => {
+                            if (window.initializePage) {
+                                console.log('🚨 [EMERGENCY NAV] 🎬 Chamando initializePage...');
+                                window.initializePage(pageId);
+                            }
+                        }, 100);
+                        
+                    } else {
+                        console.error('🚨 [EMERGENCY NAV] ❌ PÁGINA NÃO ENCONTRADA:', `page-${pageId}`);
+                    }
+                    
+                    console.log('🚨 [EMERGENCY NAV] ========================================');
+                    console.log('🚨 [EMERGENCY NAV] ✅ Navegação concluída');
+                    console.log('🚨 [EMERGENCY NAV] ========================================');
+                });
+            });
+            
+            console.log('🚨 [EMERGENCY NAV] ✅ Sistema de navegação configurado com sucesso!');
+        }
+        
+        // Executa quando DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initEmergencyNav);
+        } else {
+            initEmergencyNav();
+        }
+        
+    })();
+  </script>
+
+  <!-- Scripts do app (carregam depois da navegação de emergência) -->
+  <script type="module" src="renderer.js"></script>
+
+</body>
+</html>
