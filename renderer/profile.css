@@ -1,0 +1,217 @@
+/* profile.css — Estilos da página de Perfil
+   Extraído de profile.js para cumprir CSP style-src 'self' (sem unsafe-inline) */
+
+/* ── Layout da página ── */
+#page-profile {
+  overflow: visible;
+  max-height: calc(100vh - 100px);
+}
+
+#page-profile .page-title {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+#page-profile .card {
+  padding: 16px !important;
+  max-height: calc(100vh - 160px);
+  overflow: visible;
+}
+
+#page-profile .card-header {
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+/* ── Login required ── */
+.profile-login-required {
+  text-align: center;
+  padding: 40px;
+}
+
+.profile-login-msg {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+
+/* ── Save button ── */
+.profile-save-btn {
+  margin-top: 10px;
+}
+
+/* ── Avatar selector ── */
+.avatar-selector {
+  margin-bottom: 14px;
+}
+
+.custom-avatar-upload {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.upload-hint {
+  color: #9ca3af;
+  font-size: 0.82em;
+  margin: 5px 0 10px;
+}
+
+/* ── Upload area ── */
+.upload-area {
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 28px;
+  min-height: 140px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-area:hover {
+  border-color: #00FF87;
+  background: rgba(0, 255, 135, 0.05);
+  transform: translateY(-2px);
+}
+
+.upload-area.drag-over {
+  border-color: #00FF87;
+  background: rgba(0, 255, 135, 0.12);
+  transform: scale(1.02);
+}
+
+/* ── File input — oculto via CSS em vez de style="display:none" ── */
+.upload-file-input {
+  display: none;
+}
+
+/* ── Placeholder ── */
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.upload-placeholder--hidden {
+  display: none !important;
+}
+
+.upload-placeholder svg {
+  opacity: 0.5;
+  margin-bottom: 8px;
+  width: 38px;
+  height: 38px;
+}
+
+.upload-placeholder p {
+  margin: 2px 0;
+  font-size: 0.9em;
+}
+
+.upload-choose-text {
+  font-size: 1.1em;
+  margin-top: 8px;
+}
+
+.upload-drag-text {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* ── Preview ── */
+.upload-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.upload-preview--hidden {
+  display: none !important;
+}
+
+.upload-preview img {
+  max-width: 130px;
+  max-height: 130px;
+  border-radius: 50%;
+  border: 3px solid #00FF87;
+  box-shadow: 0 4px 20px rgba(0, 255, 135, 0.3);
+}
+
+/* ── Remove button ── */
+.remove-upload-btn {
+  position: absolute;
+  top: -5px;
+  right: calc(50% - 70px);
+  width: 26px;
+  height: 26px;
+  background: #ef4444;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-upload-btn:hover {
+  background: #dc2626;
+  transform: scale(1.15);
+}
+
+/* ── Upload status ── */
+.upload-status {
+  margin-top: 8px;
+  padding: 7px 12px;
+  font-size: 0.82em;
+  border-radius: 7px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.upload-status--hidden {
+  display: none !important;
+}
+
+.upload-status.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.upload-status.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ── Nickname section ── */
+#page-profile .nickname-section {
+  margin-top: 10px;
+}
+
+#page-profile .form-label {
+  margin-bottom: 5px;
+  font-size: 0.88rem;
+}
+
+#page-profile #nicknameInput {
+  margin-bottom: 6px;
+  padding: 10px 14px;
+}
+
+#page-profile .primary-button {
+  margin-top: 6px !important;
+  padding: 10px 16px;
+  font-size: 0.92rem;
+}

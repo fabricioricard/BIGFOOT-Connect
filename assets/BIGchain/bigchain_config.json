@@ -1,0 +1,24 @@
+{
+  "network": {
+    "port": 30303,
+    "max_peers": 50,
+    "min_peers": 5,
+    "gossip_interval": 3000,
+    "peer_timeout": 10000
+  },
+  "bootstrap": {
+    "enabled": true,
+    "endpoints": [
+      "https://raw.githubusercontent.com/fabricioricard/BIGFOOT-Connect-API/refs/heads/main/pages/api/peers/list.js"
+    ]
+  },
+  "node": {
+    "enable_pex": true,
+    "enable_gossip": true,
+    "max_known_peers": 1000
+  },
+  "consensus": {
+    "required_validations": 3,
+    "proof_expiration": 300
+  }
+}

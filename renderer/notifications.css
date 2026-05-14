@@ -1,0 +1,128 @@
+/* ==========================================
+   TOAST NOTIFICATIONS
+   Substitui style.cssText inline no renderer.js
+   ========================================== */
+
+.toast-notification {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 8px 16px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.toast-fade-out {
+  opacity: 0;
+}
+
+.toast-success {
+  background: #44bb44;
+  color: white;
+  border-radius: 4px;
+}
+
+.toast-reward {
+  background: linear-gradient(135deg, #00FF87 0%, #00D9FF 100%);
+  color: #000;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 20px rgba(0, 255, 135, 0.3);
+}
+
+/* ==========================================
+   CONFIRM MODAL
+   Substitui confirm() nativo no logout
+   ========================================== */
+
+.confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.confirm-modal-box {
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 255, 135, 0.2);
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 255, 135, 0.1);
+}
+
+.confirm-modal-text {
+  color: rgba(240, 240, 240, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 24px;
+  white-space: pre-line;
+}
+
+.confirm-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.confirm-modal-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.confirm-modal-btn--cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(240, 240, 240, 0.7);
+}
+
+.confirm-modal-btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(240, 240, 240, 1);
+}
+
+.confirm-modal-btn--confirm {
+  background: linear-gradient(135deg, #00FF87, #00D9FF);
+  color: #000;
+}
+
+.confirm-modal-btn--confirm:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   SOCIAL LINK BUTTONS
+   Substitui style inline removido de socialLinks.js
+   ===================================================== */
+
+.social-link-btn {
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  display: inline-block;
+}
+
+.social-link-btn:hover {
+  transform: scale(1.15);
+  opacity: 0.8;
+}
+
+.social-link-btn:focus-visible {
+  outline: 2px solid var(--primary-color, #00FF87);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

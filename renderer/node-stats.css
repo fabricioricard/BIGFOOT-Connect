@@ -1,0 +1,307 @@
+/* Status Dot */
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #666;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.status-dot.active {
+  background: #00FF87;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 135, 0.8),
+    0 0 0 4px rgba(0, 255, 135, 0.2);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+    box-shadow: 
+      0 0 20px rgba(0, 255, 135, 0.8),
+      0 0 0 4px rgba(0, 255, 135, 0.2);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.15);
+    box-shadow: 
+      0 0 30px rgba(0, 255, 135, 1),
+      0 0 0 6px rgba(0, 255, 135, 0.3);
+  }
+}
+
+/* Node Stats Grid */
+.node-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.node-stats-grid--3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.node-stat-item {
+  background: linear-gradient(135deg, rgba(0, 255, 135, 0.03) 0%, rgba(0, 255, 135, 0.01) 100%);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 135, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.node-stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 135, 0.1), transparent);
+  transition: left 0.5s;
+  z-index: 0;
+}
+
+.node-stat-item:hover::before {
+  left: 100%;
+}
+
+.node-stat-item:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 135, 0.08) 0%, rgba(0, 255, 135, 0.03) 100%);
+  border-color: rgba(0, 255, 135, 0.3);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 135, 0.2);
+}
+
+.node-stat-label {
+  font-size: 0.8rem;
+  color: rgba(240, 240, 240, 0.7);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.node-stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #00FF87;
+  text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 1;
+}
+
+.node-stat-value.inactive {
+  color: rgba(240, 240, 240, 0.4);
+  text-shadow: none;
+}
+
+/* Proof of Relay Status */
+.por-status {
+  background: linear-gradient(135deg, rgba(0, 255, 135, 0.08) 0%, rgba(0, 255, 135, 0.03) 100%);
+  border: 1px solid rgba(0, 255, 135, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 255, 135, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.por-status::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 255, 135, 0.1) 0%, transparent 70%);
+  animation: porGlow 8s linear infinite;
+  z-index: 0;
+}
+
+@keyframes porGlow {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+}
+
+.por-status-header {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #00FF87;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+.por-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.por-progress-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.por-progress-item:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-left-color: #00FF87;
+  transform: translateX(4px);
+}
+
+.por-progress-label {
+  color: rgba(240, 240, 240, 0.8);
+  font-weight: 500;
+}
+
+.por-progress-value {
+  color: #00FF87;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 255, 135, 0.4);
+}
+
+.por-progress-value.complete {
+  color: #00FF87;
+  animation: valueGlow 2s ease-in-out infinite;
+}
+
+@keyframes valueGlow {
+  0%, 100% { text-shadow: 0 0 8px rgba(0, 255, 135, 0.4); }
+  50% { text-shadow: 0 0 16px rgba(0, 255, 135, 0.8); }
+}
+
+.por-progress-value.incomplete {
+  color: rgba(240, 240, 240, 0.5);
+  text-shadow: none;
+}
+
+/* Can Mine Indicator */
+.can-mine-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  min-height: 56px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.can-mine-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transition: left 0.6s;
+  z-index: 0;
+}
+
+.can-mine-indicator:hover::before {
+  left: 100%;
+}
+
+.can-mine-indicator.ready {
+  background: linear-gradient(135deg, rgba(0, 255, 135, 0.15) 0%, rgba(0, 217, 255, 0.1) 100%);
+  border-color: rgba(0, 255, 135, 0.4);
+  box-shadow: 
+    0 4px 20px rgba(0, 255, 135, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #00FF87;
+  animation: readyPulse 2s ease-in-out infinite;
+}
+
+@keyframes readyPulse {
+  0%, 100% {
+    box-shadow: 
+      0 4px 20px rgba(0, 255, 135, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 6px 30px rgba(0, 255, 135, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+.can-mine-indicator.not-ready {
+  color: rgba(240, 240, 240, 0.7);
+}
+
+.can-mine-indicator > span:first-child {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px currentColor);
+  position: relative;
+  z-index: 1;
+}
+
+.can-mine-indicator.ready > span:first-child {
+  animation: iconBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.can-mine-indicator > span:last-child,
+.can-mine-indicator #canMineText {
+  position: relative;
+  z-index: 1;
+  font-weight: 600;
+  line-height: 1.4;
+  word-wrap: break-word;
+  flex: 1;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .node-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .can-mine-indicator {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    min-height: 52px;
+  }
+  
+  .can-mine-indicator > span:first-child {
+    font-size: 1.2rem;
+  }
+}

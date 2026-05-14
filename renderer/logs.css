@@ -1,0 +1,91 @@
+/* logs.css — Estilos do visualizador de logs do BIGchain node
+   Extraído de logs.js para cumprir CSP style-src 'self' (sem unsafe-inline) */
+
+/* ── Header ── */
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logs-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.logs-autoscroll-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.logs-autoscroll-check {
+  cursor: pointer;
+}
+
+.logs-clear-btn {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+}
+
+/* ── Log container ── */
+.logs-container {
+  max-height: 520px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* ── Empty state ── */
+.logs-empty {
+  color: #555;
+  text-align: center;
+  padding: 30px;
+}
+
+/* ── Log row — cor da borda via CSS custom property injetada por JS ── */
+.log-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 7px 10px;
+  margin-bottom: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--log-color, #888888);
+  border-radius: 0 4px 4px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.log-time {
+  color: #444;
+  min-width: 56px;
+  flex-shrink: 0;
+}
+
+.log-msg {
+  color: var(--log-color, #888888);
+  flex: 1;
+  word-break: break-all;
+}
+
+/* ── Legend ── */
+.logs-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.logs-legend-item {
+  color: var(--log-color, #888888);
+}

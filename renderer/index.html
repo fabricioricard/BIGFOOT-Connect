@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+  content="default-src 'self'; 
+           script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; 
+           connect-src 'self' ws: wss: 
+                     https://bigfootconnect.tech/ 
+                     https://api.bigfootconnect.tech/ 
+                     https://bigfootconnect-default-rtdb.firebaseio.com 
+                     https://bigfootconnect.firebaseapp.com 
+                     https://identitytoolkit.googleapis.com 
+                     https://firestore.googleapis.com 
+                     https://www.googleapis.com 
+                     https://www.gstatic.com 
+                     https://securetoken.googleapis.com; 
+           style-src 'self'; 
+           img-src 'self' data: https://www.gstatic.com;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <title>BIGFOOT Connect</title>
+
+  <!-- Tema inicial — script externo (sem 'unsafe-inline') -->
+  <script src="theme-init.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="node-stats.css" />
+  <link rel="stylesheet" href="chat.css" />
+  <link rel="stylesheet" href="faq.css" />
+  <link rel="stylesheet" href="logs.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <link rel="stylesheet" href="update-notifications.css" />
+  <link rel="stylesheet" href="wallet.css" />
+  <link rel="stylesheet" href="notifications.css" />
+
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <span class="brand-name">
+          <span class="brand-left">BIGFOOT</span>
+          <span class="brand-right">Connect</span>
+        </span>
+      </div>
+
+      <a href="#" class="sidebar-item active" id="nav-home" data-page="home">
+        <span class="sidebar-icon">🏠</span>
+        <span data-i18n="navHome">Home</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-wallet" data-page="wallet">
+        <span class="sidebar-icon">💼</span>
+        <span data-i18n="navWallet">Wallet</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-chat" data-page="chat">
+        <span class="sidebar-icon">💬</span>
+        <span data-i18n="navChat">Chat</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-profile" data-page="profile">
+        <span class="sidebar-icon">👤</span>
+        <span data-i18n="navProfile">Profile</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-logs" data-page="logs">
+        <span class="sidebar-icon">📋</span>
+        <span data-i18n="navLogs">Logs</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-settings" data-page="settings">
+        <span class="sidebar-icon">⚙️</span>
+        <span data-i18n="navSettings">Settings</span>
+      </a>
+      <a href="#" class="sidebar-item" id="nav-faq" data-page="faq">
+        <span class="sidebar-icon">❓</span>
+        <span data-i18n="navFAQ">FAQ</span>
+      </a>
+
+      <div class="sidebar-profile" id="authButtons"></div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content-wrapper">
+
+      <!-- HOME -->
+      <section id="page-home" class="page-content active">
+        <h1 class="page-title" data-i18n="home">Home</h1>
+        <div class="main-content-grid">
+          <div class="card">
+            <div class="card-header" data-i18n="nodeControl">Node Control</div>
+            
+            <!-- Node Stats Grid — 3x2 -->
+            <div class="node-stats-grid node-stats-grid--3col">
+              <div class="node-stat-item">
+                <div class="node-stat-label" data-i18n="peers">📡 Peers</div>
+                <div class="node-stat-value" id="statPeers">0</div>
+              </div>
+              <div class="node-stat-item">
+                <div class="node-stat-label" data-i18n="blocks">📦 Blocks</div>
+                <div class="node-stat-value" id="statBlocks">0</div>
+              </div>
+              <div class="node-stat-item">
+                <div class="node-stat-label" data-i18n="balance">💰 Balance</div>
+                <div class="node-stat-value" id="statBalance">0 BIG</div>
+              </div>
+              <div class="node-stat-item">
+                <div class="node-stat-label" data-i18n="relays">🔄 Relays</div>
+                <div class="node-stat-value" id="statRelays">0</div>
+              </div>
+              <div class="node-stat-item">
+                <div class="node-stat-label" data-i18n="rewardBlock">⛏️ Reward/Block</div>
+                <div class="node-stat-value" id="statReward">— BIG</div>
+              </div>
+              <div class="node-stat-item">
+                <div class="node-stat-label" data-i18n="supply">📊 Supply</div>
+                <div class="node-stat-value" id="statSupply">— / 21M</div>
+              </div>
+            </div>
+
+            <!-- Proof of Relay Status -->
+            <div class="por-status">
+              <div class="por-status-header">
+                ⛏️ <span data-i18n="proofOfRelayStatus">PoR Mining Status</span>
+              </div>
+              <div class="por-progress">
+                <div class="por-progress-item">
+                  <span class="por-progress-label" data-i18n="creditsCost">Credits (cost 50):</span>
+                  <span class="por-progress-value" id="porCredits">0 / 50</span>
+                </div>
+                <div class="por-progress-item">
+                  <span class="por-progress-label" data-i18n="relayScore">Relay Score:</span>
+                  <span class="por-progress-value" id="porScore">0.0</span>
+                </div>
+                <div class="por-progress-item">
+                  <span class="por-progress-label" data-i18n="scoreBonus">Score Bonus:</span>
+                  <span class="por-progress-value" id="porBonus">0%</span>
+                </div>
+                <div class="por-progress-item">
+                  <span class="por-progress-label" data-i18n="dailyEmission">Daily Emission:</span>
+                  <span class="por-progress-value" id="porEmission">1440 BIG/day</span>
+                </div>
+                <div class="por-progress-item">
+                  <span class="por-progress-label" data-i18n="roundRobin">Round-Robin:</span>
+                  <span class="por-progress-value" id="porLeader">Waiting</span>
+                </div>
+              </div>
+              <div class="can-mine-indicator not-ready" id="canMineIndicator">
+                <span>⏳</span>
+                <span id="canMineText" data-i18n="accumulatingProofs">Accumulating relay proofs...</span>
+              </div>
+            </div>
+            
+            <button class="big-button" id="connectBtn">🔌 Connect</button>
+            <div class="status-container" id="statusContainer">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText" data-i18n="statusDisconnected">Disconnected</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header" id="usageGraphTitle" data-i18n="bigHistory">BIG History</div>
+            <div class="chart-wrapper">
+    <canvas id="usageChart" class="chart-canvas"></canvas>
+</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WALLET -->
+      <section id="page-wallet" class="page-content">
+        <!-- Será preenchido pelo wallet.js -->
+      </section>
+
+      <!-- CHAT -->
+      <section id="page-chat" class="page-content">
+        <!-- Será preenchido pelo chat.js -->
+      </section>
+
+      <!-- PROFILE -->
+      <section id="page-profile" class="page-content">
+        <!-- Será preenchido pelo profile.js -->
+      </section>
+
+      <!-- LOGS -->
+      <section id="page-logs" class="page-content">
+        <!-- Será preenchido pelo logs.js -->
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="page-settings" class="page-content">
+        <h1 class="page-title" data-i18n="settings">Settings</h1>
+        
+        <div class="card">
+          <div class="card-header" data-i18n="generalSettings">General Settings</div>
+          <div id="settingsForm">
+            <!-- Seletor de idioma será inserido aqui pelo settings.js -->
+            
+            <div class="toggle-switch-container">
+              <span class="toggle-switch-label" id="themeLabel" data-i18n="darkMode">Dark Mode</span>
+              <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="page-faq" class="page-content">
+        <!-- Será preenchido pelo faq.js -->
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ===== ÍCONES SOCIAIS ===== -->
+  <div id="socialIcons">
+    <a href="https://x.com/BIGFOOT_Connect" target="_blank" rel="noopener noreferrer" aria-label="X">
+      <img src="icons/x.png" alt="X" />
+    </a>
+    <a href="https://www.youtube.com/@BIGFOOTConnect" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+      <img src="icons/youtube.png" alt="YouTube" />
+    </a>
+    <a href="https://discord.gg/mkfmncN5Sa" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+      <img src="icons/discord.png" alt="Discord" />
+    </a>
+    <a href="https://t.me/+qrkA9s2VTxVhMzcx" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+      <img src="icons/telegram.png" alt="Telegram" />
+    </a>
+  </div>
+
+  <!-- Scripts do app -->
+  <script src="emergency-nav.js"></script>
+  <script type="module" src="renderer.js"></script>
+
+</body>
+</html>

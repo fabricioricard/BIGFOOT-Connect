@@ -1,0 +1,181 @@
+/* ==========================================
+   CHAT COMPONENT STYLES
+   Utiliza variáveis CSS do tema (styles.css)
+   ========================================== */
+
+/* Container principal do chat */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+  max-height: 800px;
+}
+
+/* Área de mensagens */
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Campo de entrada e botão de envio */
+.chat-input {
+  display: flex;
+  padding-top: 15px;
+  gap: 10px;
+}
+
+.chat-input input {
+  flex-grow: 1;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-color, white);
+  transition: border-color 0.2s;
+}
+
+.chat-input input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.chat-input button {
+  width: auto;
+  padding: 12px 24px;
+}
+
+/* Mensagem do sistema (aviso / boas-vindas) */
+.system-message {
+  color: var(--text-secondary, #9ca3af);
+  font-style: italic;
+  text-align: center;
+  font-size: 0.9em;
+  padding: 8px;
+}
+
+/* Wrapper de cada mensagem */
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+  position: relative;
+}
+
+.message-wrapper.self {
+  align-self: flex-end;
+}
+
+.message-wrapper.other {
+  align-self: flex-start;
+}
+
+/* Cabeçalho da mensagem (avatar + nickname) */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.85em;
+  opacity: 0.9;
+}
+
+/* Avatar */
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(0, 255, 135, 0.3);
+}
+
+.message-avatar img,
+.message-avatar svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Nickname */
+.message-nickname {
+  font-weight: 600;
+  color: var(--text-color, white);
+}
+
+/* Balão da mensagem */
+.message-bubble {
+  padding: 10px 14px;
+  border-radius: 15px;
+  word-wrap: break-word;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* Mensagem própria (usuário logado) */
+.message-wrapper.self .message-bubble {
+  background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+/* Mensagem de outro usuário */
+.message-wrapper.other .message-bubble {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-color, white);
+  border-bottom-left-radius: 4px;
+}
+
+/* Timestamp */
+.message-time {
+  font-size: 0.7em;
+  opacity: 0.6;
+  margin-top: 4px;
+  text-align: right;
+  color: var(--text-secondary, #aaa);
+}
+
+.message-wrapper.other .message-time {
+  text-align: left;
+}
+
+/* Botão de deletar mensagem (apenas para mensagens próprias) */
+.message-delete-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.message-wrapper.self:hover .message-delete-btn {
+  display: flex;
+}
+
+.message-delete-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}

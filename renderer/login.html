@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src 'self' https://bigfootconnect-default-rtdb.firebaseio.com https://bigfootconnect.firebaseapp.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://bigfootconnect.tech https://api.bigfootconnect.tech; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <title>BIGFOOT Connect - Login</title>
+    <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button class="lang-btn" id="langBtn" aria-label="Change language">
+            <span class="flag-icon">🇺🇸</span>
+            <span class="lang-text">EN</span>
+        </button>
+        <div class="lang-dropdown" id="langDropdown">
+            <button class="lang-option" data-lang="en">
+                <span class="flag-icon">🇺🇸</span>
+                <span>English</span>
+            </button>
+            <button class="lang-option" data-lang="pt">
+                <span class="flag-icon">🇧🇷</span>
+                <span>Português</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <!-- COLUNA ESQUERDA: Logo e Branding -->
+            <div class="logo-section">
+                <!-- Logo SVG inline (sempre aparece) -->
+                <div class="logo-container" id="logoContainer">
+                    <!-- Tenta carregar logo.png -->
+                    <img src="logo.png" alt="BIGFOOT Logo" class="logo-image" id="logoImg">
+                    
+                    <!-- Fallback: Logo SVG se não encontrar logo.png -->
+                    <svg id="svgLogo" class="logo-svg-fallback" viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00FF87" stop-opacity="1" />
+                                <stop offset="100%" stop-color="#60EFFF" stop-opacity="1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Pé do Bigfoot estilizado -->
+                        <ellipse cx="50" cy="70" rx="35" ry="20" fill="url(#logoGradient)" opacity="0.3"/>
+                        <path d="M 30 40 Q 50 20 70 40 Q 70 60 50 80 Q 30 60 30 40 Z" 
+                              fill="url(#logoGradient)" 
+                              stroke="#00FF87" 
+                              stroke-width="2"/>
+                        <!-- Dedos do pé -->
+                        <circle cx="40" cy="35" r="6" fill="#00FF87"/>
+                        <circle cx="50" cy="30" r="7" fill="#00FF87"/>
+                        <circle cx="60" cy="35" r="6" fill="#00FF87"/>
+                    </svg>
+                </div>
+                
+                <!-- Título com estilo especial -->
+                <h1 class="logo-title">
+                    <span class="logo-title-white">BIGFOOT</span>
+                    <span class="logo-title-green">Connect</span>
+                </h1>
+                
+                <div class="branding-text">
+                    <p id="brandingText1" class="branding-text-primary">Run a node and earn BIG</p>
+                    <p id="brandingText2" class="branding-text-secondary">Join the BIGFOOT community</p>
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA: Formulário -->
+            <div class="form-section">
+                <div class="welcome-text">
+                    <h2 id="authTitle">Welcome back!</h2>
+                    <p id="authSubtitle">Sign in to continue your journey</p>
+                </div>
+
+                <div class="error-message" id="errorMessage">
+                    <span>⚠️</span>
+                    <span id="errorText"></span>
+                </div>
+
+                <form id="authForm">
+                    <div class="form-group">
+                        <label class="form-label" for="userEmail" id="emailLabel">Email</label>
+                        <input 
+                            type="email" 
+                            id="userEmail" 
+                            class="form-input" 
+                            placeholder="your@email.com"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="userPassword" id="passwordLabel">Password</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="userPassword" 
+                                class="form-input" 
+                                placeholder="••••••••"
+                                required
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="primary-button" id="submitButton">
+                        <span id="buttonText">Sign In</span>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span id="dividerText">or</span>
+                </div>
+
+                <button class="google-button" id="googleButton">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span id="googleButtonText">Continue with Google</span>
+                </button>
+
+                <p class="register-prompt">
+                    <span id="noAccountText">Don't have an account?</span>
+                    <button type="button" id="registerLink" class="register-link-btn" data-text-register="Create account" data-text-register-pt="Criar conta">Create account</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase — SRI hashes garantem integridade dos scripts do CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"
+            integrity="sha384-HLJUgAQ2oo6rdMC4QW+Oz2qQfPOtu/lzncKG4sZiq8+2W9uOa3K0b3UGpckKqv7H"
+            crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"
+            integrity="sha384-+/4lqMnmLqwbdHXshvGDmBTeWlNoPRdjXi4ZsiBj10EhQXaTBe3RF5JZktdSjug6"
+            crossorigin="anonymous"></script>
+    
+    <!-- Login Script -->
+    <script src="login.js"></script>
+</body>
+</html>

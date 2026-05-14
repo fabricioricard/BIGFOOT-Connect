@@ -1,0 +1,79 @@
+# Binários
+bigchain
+bigchain.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build directory
+build/
+dist/
+
+# Test binaries
+*.test
+
+# Coverage files
+*.out
+coverage.html
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Blockchain data
+blockchain.json
+*.blockchain
+wallets/
+data/
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Configuration files (optional, if they contain sensitive data)
+config.local.json
+.env
+.env.local
+
+# Docker
+.dockerignore
+
+# Backup files
+*.bak
+backup_*
+
+# ═══════════════════════════════════════════════════════
+# 🔒 SEGURANÇA - CHAVES PRIVADAS (NUNCA COMMITAR!)
+# ═══════════════════════════════════════════════════════
+keypair.json
+*.key
+*.pem
+*.keypair
+solana-keypair.json
+
+# Bridge state (pode conter dados sensíveis)
+bridge_solana.json
+
+# Wallets privadas
+wallet_*.json
