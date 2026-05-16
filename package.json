@@ -1,6 +1,6 @@
 {
   "name": "bigfoot-connect",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "main.js",
   "productName": "BIGFOOT Connect",
   "description": "Run a node and earn BIG.",
