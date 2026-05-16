@@ -1,6 +1,6 @@
 {
   "name": "bigfoot-connect",
-  "version": "1.4.2",
+  "version": "1.4.9",
   "main": "main.js",
   "productName": "BIGFOOT Connect",
   "description": "Run a node and earn BIG.",
@@ -30,26 +30,24 @@
       }
     ],
     "files": [
-      "!**/*",
       "main.js",
       "preload.js",
       "renderer/**/*",
       "*.html",
       "*.css",
       "assets/**/*",
-      "!.env",
-      "!.env.*",
+      "package.json",
       "!**/*.map",
       "!**/test/**",
       "!**/tests/**",
       "!**/__tests__/**",
-      "!**/coverage/**"
+      "!**/coverage/**",
+      "!.env",
+      "!.env.*"
     ],
     "asarUnpack": [
       "node_modules/@solana/**/*",
-      "node_modules/firebase/**/*",
-      "node_modules/detent/**/*",
-      "node_modules/lzma-native/**/*"
+      "node_modules/firebase/**/*"
     ],
     "extraResources": [
       {
@@ -85,21 +83,21 @@
   },
   "devDependencies": {
     "cross-env": "7.0.3",
-    "electron": "37.2.3",
+    "electron": "^37.10.3",
     "electron-builder": "26.0.12"
   },
   "dependencies": {
     "@solana/spl-token": "0.4.14",
     "@solana/web3.js": "1.98.4",
-    "axios": "1.10.0",
+    "axios": "^1.16.1",
     "combined-stream": "1.0.8",
+    "dotenv": "16.4.5",
     "electron-is-dev": "2.0.0",
     "electron-squirrel-startup": "1.0.1",
-    "electron-updater": "6.1.7",
+    "electron-updater": "^6.8.3",
     "firebase": "11.10.0",
-    "follow-redirects": "1.15.9",
+    "follow-redirects": "^1.16.0",
     "node-fetch": "2.7.0",
-    "speedtest-net": "2.2.0",
-    "dotenv": "16.4.5"
+    "speedtest-net": "2.2.0"
   }
 }

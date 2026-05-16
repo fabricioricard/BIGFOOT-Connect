@@ -1,6 +1,9 @@
-require('dotenv').config(); // Carrega variáveis de ambiente do .env (Firebase config, etc.)
-
 const { app, BrowserWindow, ipcMain, shell, Tray, Menu, session, dialog } = require('electron');
+
+if (!app.isPackaged) {
+  require('dotenv').config();
+}
+
 const path = require('path');
 const { spawn, exec } = require('child_process');
 const axios = require('axios');
@@ -1638,18 +1641,17 @@ ipcMain.handle('get-language', async () => {
 });
 
 // ==========================================
-// FIREBASE CONFIG — lido de variáveis de ambiente
-// NUNCA hardcode credenciais no renderer
+// FIREBASE CONFIG — valores públicos do Client SDK
+// Podem ficar no código, pois são protegidos pelas Regras de Segurança
 // ==========================================
-// Logo após os requires e antes de qualquer app.whenReady()
 ipcMain.handle('get-firebase-config', () => {
   const config = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID,
+    apiKey: "AIzaSyAhziJbG5Pxg0UYvq784YH4zXpsdKfh7AY",
+    authDomain: "bigfoot-connect.firebaseapp.com",
+    projectId: "bigfoot-connect",
+    storageBucket: "bigfoot-connect.appspot.com",
+    messagingSenderId: "177999879162",
+    appId: "1:177999879162:web:a1ea739930cac97475e243",
   };
 
   console.log('[MAIN] Firebase config delivered to renderer. Has apiKey:', !!config.apiKey);
